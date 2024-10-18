@@ -16,7 +16,7 @@ services:
     volumes:
       - rd-data:/data
     ports:
-      - "6379:6379"
+      - "6479:6479"
     restart: unless-stopped
 
   app:

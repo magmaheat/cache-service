@@ -3,12 +3,14 @@ package config
 import (
 	"github.com/ilyakaznacheev/cleanenv"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 type Config struct {
 	App
 	HTTP
 	PG
+	RD
 	Log
 	JWT
 }
@@ -32,8 +34,13 @@ type PG struct {
 	MaxPoolSize int    `env-required:"true" enc:"PG_MAX_POOL_SIZE"`
 }
 
+type RD struct {
+	URL string `env-required:"true" env:"RD_URL"`
+}
+
 type JWT struct {
-	SignKey string `env-required:"true" env:"JWT_SIGN_KEY"`
+	SignKey  string        `env-required:"true" env:"JWT_SIGN_KEY"`
+	TokenTTL time.Duration `env-required:"true" env:"JWT_TOKEN_TTL"`
 }
 
 func New() *Config {

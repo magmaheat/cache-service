@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"context"
 	"github.com/magmaheat/cache-service/intarnal/repo/pgdb"
 	"github.com/magmaheat/cache-service/intarnal/repo/rddb"
 	"github.com/magmaheat/cache-service/pkg/postgres"
@@ -8,6 +9,8 @@ import (
 )
 
 type Auth interface {
+	CreateUser(ctx context.Context, username, password string) (int, error)
+	GetUserIdAndPassword(ctx context.Context, username, password string) (int, string, error)
 }
 
 type Cache interface {

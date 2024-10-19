@@ -6,6 +6,7 @@ import (
 	"github.com/magmaheat/cache-service/intarnal/http"
 	"github.com/magmaheat/cache-service/intarnal/repo"
 	"github.com/magmaheat/cache-service/intarnal/service"
+	"github.com/magmaheat/cache-service/pkg/hasher"
 	"github.com/magmaheat/cache-service/pkg/httpserver"
 	"github.com/magmaheat/cache-service/pkg/postgres"
 	"github.com/magmaheat/cache-service/pkg/redis"
@@ -32,6 +33,7 @@ func Run() {
 	log.Info("Initializing services...")
 	deps := service.ServicesDependencies{
 		Repos:    repositories,
+		Hasher:   hasher.NewCryptoHasher(),
 		SignKey:  cfg.JWT.SignKey,
 		TokenTTL: cfg.JWT.TokenTTL,
 	}

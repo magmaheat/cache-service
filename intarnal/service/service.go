@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/magmaheat/cache-service/intarnal/repo"
+	"github.com/magmaheat/cache-service/pkg/hasher"
 	"time"
 )
 
@@ -14,13 +15,14 @@ type Services struct {
 type ServicesDependencies struct {
 	Repos *repo.Repositories
 
+	Hasher   hasher.HashManager
 	SignKey  string
 	TokenTTL time.Duration
 }
 
 func New(deps ServicesDependencies) *Services {
 	return &Services{
-		Auth:  NewAuthService(deps.Repos.Auth, deps.SignKey, deps.TokenTTL),
+		Auth:  NewAuthService(deps.Repos.Auth, deps.Hasher, deps.SignKey, deps.TokenTTL),
 		Files: NewFilesService(deps.Repos.Files),
 		Cache: NewCacheService(deps.Repos.Cache),
 	}

@@ -31,7 +31,7 @@ type HTTP struct {
 
 type PG struct {
 	URL         string `env-required:"true" env:"PG_URL"`
-	MaxPoolSize int    `env-required:"true" enc:"PG_MAX_POOL_SIZE"`
+	MaxPoolSize int    `env-required:"true" env:"PG_MAX_POOL_SIZE"`
 }
 
 type RD struct {
@@ -46,7 +46,7 @@ type JWT struct {
 func New() *Config {
 	var cfg Config
 
-	err := cleanenv.UpdateEnv(&cfg)
+	err := cleanenv.ReadEnv(&cfg)
 	if err != nil {
 		log.Fatalf("error setup env: %v", err)
 	}

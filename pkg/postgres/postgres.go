@@ -34,6 +34,8 @@ func New(url string, opts ...Options) *Postgres {
 		opt(pg)
 	}
 
+	url += "?sslmode=disable"
+
 	pg.Builder = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 
 	poolConfig, err := pgxpool.ParseConfig(url)

@@ -15,14 +15,15 @@ type Services struct {
 type ServicesDependencies struct {
 	Repos *repo.Repositories
 
-	Hasher   hasher.HashManager
-	SignKey  string
-	TokenTTL time.Duration
+	AdminToken string
+	Hasher     hasher.HashManager
+	SignKey    string
+	TokenTTL   time.Duration
 }
 
 func New(deps ServicesDependencies) *Services {
 	return &Services{
-		Auth:  NewAuthService(deps.Repos.Auth, deps.Hasher, deps.SignKey, deps.TokenTTL),
+		Auth:  NewAuthService(deps.Repos.Auth, deps.AdminToken, deps.Hasher, deps.SignKey, deps.TokenTTL),
 		Files: NewFilesService(deps.Repos.Files),
 		Cache: NewCacheService(deps.Repos.Cache),
 	}

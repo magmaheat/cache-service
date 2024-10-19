@@ -2,6 +2,7 @@ package http
 
 import (
 	"errors"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"github.com/magmaheat/cache-service/intarnal/service"
@@ -22,19 +23,27 @@ func newAuthRoutes(g *echo.Group, authService service.Auth) {
 }
 
 type registerInput struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Login    string `json:"login"`
+	Password string `json:"pswd"`
+	Token    string `json:"token"`
 }
 
 func (a *authRoutes) register(c echo.Context) error {
 	var input registerInput
 
-	if err := c.Bind(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid body request")
+	if err := c.Bind(&input); err != nil || input.Token == "" {
+		newErrorResponse(c, http.StatusBadRequest, "invalid tut body request")
 		return err
 	}
 
-	id, err := a.authRoutes.CreateUser(c.Request().Context(), input.Username, input.Password)
+	if !a.authRoutes.CheckAdminToken(input.Token) {
+		newErrorResponse(c, http.StatusForbidden, "invalid token")
+		return fmt.Errorf("invalid token")
+	}
+
+	//TODO add validate
+
+	login, err := a.authRoutes.CreateUser(c.Request().Context(), input.Login, input.Password)
 	if err != nil {
 		if errors.Is(err, service.ErrAlreadyExists) {
 			newErrorResponse(c, http.StatusBadRequest, err.Error())
@@ -45,17 +54,19 @@ func (a *authRoutes) register(c echo.Context) error {
 	}
 
 	type response struct {
-		Id int `json:"id"`
+		Login string `json:"login"`
 	}
 
-	return c.JSON(http.StatusOK, response{
-		Id: id,
+	return c.JSON(http.StatusOK, Response{
+		Response: response{
+			Login: login,
+		},
 	})
 }
 
 type authInput struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"login"`
+	Password string `json:"pswd"`
 }
 
 func (a *authRoutes) auth(c echo.Context) error {
@@ -87,7 +98,9 @@ func (a *authRoutes) auth(c echo.Context) error {
 		Token string `json:"token"`
 	}
 
-	return c.JSON(http.StatusOK, response{
-		Token: token,
+	return c.JSON(http.StatusOK, Response{
+		Response: response{
+			Token: token,
+		},
 	})
 }

@@ -32,10 +32,11 @@ func Run() {
 
 	log.Info("Initializing services...")
 	deps := service.ServicesDependencies{
-		Repos:    repositories,
-		Hasher:   hasher.NewCryptoHasher(),
-		SignKey:  cfg.JWT.SignKey,
-		TokenTTL: cfg.JWT.TokenTTL,
+		Repos:      repositories,
+		AdminToken: cfg.JWT.AdminToken,
+		Hasher:     hasher.NewCryptoHasher(),
+		SignKey:    cfg.JWT.SignKey,
+		TokenTTL:   cfg.JWT.TokenTTL,
 	}
 	services := service.New(deps)
 

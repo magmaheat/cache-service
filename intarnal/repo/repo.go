@@ -9,8 +9,8 @@ import (
 )
 
 type Auth interface {
-	CreateUser(ctx context.Context, username, password string) (int, error)
-	GetUserIdAndPassword(ctx context.Context, username, password string) (int, string, error)
+	CreateUser(ctx context.Context, login, password string) (string, error)
+	GetUserIdAndPassword(ctx context.Context, login string) (int, string, error)
 }
 
 type Cache interface {

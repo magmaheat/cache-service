@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/magmaheat/cache-service/intarnal/repo"
 	"github.com/magmaheat/cache-service/intarnal/repo/repoerrs"
@@ -17,47 +18,61 @@ type TokenClaims struct {
 }
 
 type Auth interface {
-	CreateUser(ctx context.Context, username, password string) (int, error)
-	GenerateToken(ctx context.Context, username, password string) (string, error)
+	CheckAdminToken(token string) bool
+	CreateUser(ctx context.Context, login, password string) (string, error)
+	GenerateToken(ctx context.Context, login, password string) (string, error)
+	ParseToken(accessToken string) (int, error)
 }
 
 type AuthService struct {
-	authRepo repo.Auth
+	authRepo   repo.Auth
+	adminToken string
 
 	hasher   hasher.HashManager
 	signKey  string
 	tokenTTL time.Duration
 }
 
-func NewAuthService(authRepo repo.Auth, hasher hasher.HashManager, signKey string, tokenTTL time.Duration) *AuthService {
+func NewAuthService(
+	authRepo repo.Auth,
+	adminToken string,
+	hasher hasher.HashManager,
+	signKey string,
+	tokenTTL time.Duration,
+) *AuthService {
 	return &AuthService{
-		authRepo: authRepo,
-		hasher:   hasher,
-		signKey:  signKey,
-		tokenTTL: tokenTTL,
+		authRepo:   authRepo,
+		adminToken: adminToken,
+		hasher:     hasher,
+		signKey:    signKey,
+		tokenTTL:   tokenTTL,
 	}
 }
 
-func (a *AuthService) CreateUser(ctx context.Context, username, password string) (int, error) {
+func (a *AuthService) CheckAdminToken(token string) bool {
+	return a.adminToken == token
+}
+
+func (a *AuthService) CreateUser(ctx context.Context, login, password string) (string, error) {
 	hash, err := a.hasher.HashPassword(password)
 	if err != nil {
 		log.Errorf("service - auth - CreateUser - HashPassword: %v", err)
-		return 0, err
+		return "", err
 	}
 
-	id, err := a.authRepo.CreateUser(ctx, username, hash)
+	userLogin, err := a.authRepo.CreateUser(ctx, login, hash)
 	if err != nil {
 		if errors.Is(err, repoerrs.ErrAlreadyExists) {
-			return 0, ErrAlreadyExists
+			return "", ErrAlreadyExists
 		}
-		return 0, err
+		return "", err
 	}
 
-	return id, nil
+	return userLogin, nil
 }
 
-func (a *AuthService) GenerateToken(ctx context.Context, username, password string) (string, error) {
-	id, hash, err := a.authRepo.GetUserIdAndPassword(ctx, username, password)
+func (a *AuthService) GenerateToken(ctx context.Context, login, password string) (string, error) {
+	id, hash, err := a.authRepo.GetUserIdAndPassword(ctx, login)
 	if err != nil {
 		if errors.Is(err, repoerrs.ErrNotFound) {
 			return "", ErrNotFound
@@ -84,4 +99,25 @@ func (a *AuthService) GenerateToken(ctx context.Context, username, password stri
 	}
 
 	return tokenString, nil
+}
+
+func (s *AuthService) ParseToken(accessToken string) (int, error) {
+	token, err := jwt.ParseWithClaims(accessToken, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(s.signKey), nil
+	})
+
+	if err != nil {
+		return 0, fmt.Errorf("cannot parse token")
+	}
+
+	claims, ok := token.Claims.(*TokenClaims)
+	if !ok {
+		return 0, fmt.Errorf("cannot parse token")
+	}
+
+	return claims.UserId, nil
 }

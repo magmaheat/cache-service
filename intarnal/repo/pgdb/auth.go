@@ -19,37 +19,37 @@ func NewAuthRepo(pg *postgres.Postgres) *AuthRepo {
 	return &AuthRepo{pg}
 }
 
-func (a *AuthRepo) CreateUser(ctx context.Context, username, password string) (int, error) {
+func (a *AuthRepo) CreateUser(ctx context.Context, login, password string) (string, error) {
 	const fn = "repo - pgdb - auth - CreateUser"
 
 	sql, args, _ := a.Builder.
 		Insert("users").
-		Columns("username, password").
-		Values(username, password).
-		Suffix("RETURNING id").
+		Columns("login, password").
+		Values(login, password).
+		Suffix("RETURNING login").
 		ToSql()
 
-	var id int
-	err := a.Pool.QueryRow(ctx, sql, args...).Scan(&id)
+	var userLogin string
+	err := a.Pool.QueryRow(ctx, sql, args...).Scan(&userLogin)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if ok := errors.As(err, &pgErr); ok {
 			if pgErr.Code == "23505" {
-				return 0, repoerrs.ErrAlreadyExists
+				return "", repoerrs.ErrAlreadyExists
 			}
 		}
 		log.Errorf("%s - QueryRow: %v", fn, err)
-		return 0, fmt.Errorf("%s - QueryRow: %v", fn, err)
+		return "", fmt.Errorf("%s - QueryRow: %v", fn, err)
 	}
 
-	return id, nil
+	return userLogin, nil
 }
 
-func (a *AuthRepo) GetUserIdAndPassword(ctx context.Context, username, password string) (int, string, error) {
+func (a *AuthRepo) GetUserIdAndPassword(ctx context.Context, login string) (int, string, error) {
 	sql, args, _ := a.Builder.
 		Select("id, password").
 		From("users").
-		Where("username = ?", username).
+		Where("login = ?", login).
 		ToSql()
 
 	var hash string

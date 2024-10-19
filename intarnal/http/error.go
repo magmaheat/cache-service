@@ -1,8 +1,25 @@
 package http
 
-import "github.com/labstack/echo/v4"
+import (
+	"fmt"
+	"github.com/labstack/echo/v4"
+)
 
-func newErrorResponse(c echo.Context, errStatus int, message string) {
-	report := echo.NewHTTPError(errStatus, message)
-	_ = c.JSON(errStatus, report)
+var (
+	ErrInvalidAuthHeader = fmt.Errorf("invalid auth header")
+	ErrCannotParseToken  = fmt.Errorf("cannot parse token")
+)
+
+type ErrorResponse struct {
+	Code int    `json:"code"`
+	Text string `json:"text"`
+}
+
+func newErrorResponse(c echo.Context, status int, message string) {
+	c.JSON(status, Response{
+		Errors: &ErrorResponse{
+			Code: status,
+			Text: message,
+		},
+	})
 }

@@ -10,6 +10,12 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
+type Response struct {
+	Errors   *ErrorResponse `json:"error,omitempty"`
+	Response interface{}    `json:"response,omitempty"`
+	Data     interface{}    `json:"data,omitempty"`
+}
+
 func Init(services *service.Services) *echo.Echo {
 	handler := echo.New()
 
@@ -32,6 +38,12 @@ func Init(services *service.Services) *echo.Echo {
 	{
 		_ = h
 	}
+
+	//h.Any("/api/*", func(c echo.Context) error {
+	//	newErrorResponse(c, http.StatusMethodNotAllowed, "Method not allowed")
+	//	return nil
+	//})
+
 	return handler
 }
 

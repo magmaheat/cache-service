@@ -39,8 +39,9 @@ type RD struct {
 }
 
 type JWT struct {
-	SignKey  string        `env-required:"true" env:"JWT_SIGN_KEY"`
-	TokenTTL time.Duration `env-required:"true" env:"JWT_TOKEN_TTL"`
+	AdminToken string        `env-required:"true" env:"JWT_ADMIN_TOKEN"`
+	SignKey    string        `env-required:"true" env:"JWT_SIGN_KEY"`
+	TokenTTL   time.Duration `env-required:"true" env:"JWT_TOKEN_TTL"`
 }
 
 func New() *Config {

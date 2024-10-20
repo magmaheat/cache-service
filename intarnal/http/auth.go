@@ -20,6 +20,7 @@ func newAuthRoutes(g *echo.Group, authService service.Auth) {
 
 	g.POST("/register", r.register)
 	g.POST("/auth", r.auth)
+	g.DELETE("/auth/:token", r.deleteToken)
 }
 
 type registerInput struct {
@@ -101,6 +102,28 @@ func (a *authRoutes) auth(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{
 		Response: response{
 			Token: token,
+		},
+	})
+}
+
+func (a *authRoutes) deleteToken(c echo.Context) error {
+	token := c.Param("token")
+
+	if token == "" {
+		log.Errorf("http - auth - deleteToken - c.Param: param token empty")
+		newErrorResponse(c, http.StatusBadRequest, "param token empty")
+		return fmt.Errorf("param token empty")
+	}
+
+	err := a.authRoutes.AddTokenInBlackList(c.Request().Context(), token)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, "internal server error")
+		return err
+	}
+
+	return c.JSON(http.StatusOK, Response{
+		Response: map[string]bool{
+			token: true,
 		},
 	})
 }

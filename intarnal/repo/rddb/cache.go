@@ -3,6 +3,7 @@ package rddb
 import (
 	"context"
 	"fmt"
+	"github.com/magmaheat/cache-service/intarnal/entity"
 	"github.com/magmaheat/cache-service/pkg/redis"
 	log "github.com/sirupsen/logrus"
 )
@@ -53,4 +54,38 @@ func (c *CacheRepo) GetDocument(ctx context.Context, id string) (map[string]stri
 	}
 
 	return allFields, nil
+}
+
+func (c *CacheRepo) GetDocuments(ctx context.Context) ([]entity.Meta, error) {
+	keys, err := c.Client.Keys(ctx, "document:*").Result()
+	if err != nil {
+		log.Errorf("repo - cache - GetDocuments - Client.Keys: %v", err)
+		return nil, err
+	}
+
+	var metaList []entity.Meta
+
+	for _, key := range keys {
+		var meta entity.Meta
+
+		err = c.Client.HGet(ctx, key, "meta").Scan(&meta)
+		if err != nil {
+			log.Error("repo - cache - GetDocuments - HGet: %v", err)
+			return nil, err
+		}
+
+		metaList = append(metaList, meta)
+	}
+
+	return metaList, nil
+}
+
+func (c *CacheRepo) DeleteDocument(ctx context.Context, key string) (int, error) {
+	count, err := c.Client.Del(ctx, key).Result()
+	if err != nil {
+		log.Errorf("repo - cache - DeleteDocument: %v", err)
+		return 0, err
+	}
+
+	return int(count), nil
 }

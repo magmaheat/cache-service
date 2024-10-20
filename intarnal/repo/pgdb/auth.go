@@ -45,24 +45,60 @@ func (a *AuthRepo) CreateUser(ctx context.Context, login, password string) (stri
 	return userLogin, nil
 }
 
-func (a *AuthRepo) GetUserIdAndPassword(ctx context.Context, login string) (int, string, error) {
+func (a *AuthRepo) GetUserPassword(ctx context.Context, login string) (string, error) {
 	sql, args, _ := a.Builder.
-		Select("id, password").
+		Select("password").
 		From("users").
 		Where("login = ?", login).
 		ToSql()
 
 	var hash string
-	var id int
 
-	err := a.Pool.QueryRow(ctx, sql, args...).Scan(&id, &hash)
+	err := a.Pool.QueryRow(ctx, sql, args...).Scan(&hash)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return 0, "", repoerrs.ErrNotFound
+			return "", repoerrs.ErrNotFound
 		}
 		log.Errorf("pgdb - auth - GetUserIdAmdPassowrd: %v", err)
-		return 0, "", err
+		return "", err
 	}
 
-	return id, hash, nil
+	return hash, nil
+}
+
+func (a *AuthRepo) AddTokenInBlackList(ctx context.Context, token string) error {
+	sql, args, _ := a.Builder.
+		Insert("tokens").
+		Columns("token").
+		Values(token).
+		ToSql()
+
+	_, err := a.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		log.Errorf("repo - auth - AddTokenInBlackList - Pool.Query: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *AuthRepo) CheckTokenInBlackList(ctx context.Context, token string) (int, error) {
+	sql, args, _ := a.Builder.
+		Select("id").
+		From("tokens").
+		Where("token = ?", token).
+		ToSql()
+
+	var id int
+
+	err := a.Pool.QueryRow(ctx, sql, args...).Scan(&id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, nil
+		}
+		log.Errorf("repo - auth - CheckTokenInBlackList - Pool.QueryRow: %v", err)
+		return 0, err
+	}
+
+	return id, nil
 }

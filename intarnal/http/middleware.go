@@ -14,8 +14,6 @@ type AuthMiddleware struct {
 
 func (m *AuthMiddleware) UserIdentity(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		const fn = ""
-
 		token, ok := bearerToken(c.Request())
 		if !ok {
 			log.Errorf("http - middleware - UserIdentity - bearerToken")
@@ -23,13 +21,19 @@ func (m *AuthMiddleware) UserIdentity(next echo.HandlerFunc) echo.HandlerFunc {
 			return nil
 		}
 
-		id, err := m.authService.ParseToken(token)
+		check, _ := m.authService.CheckTokenInBlackList(c.Request().Context(), token)
+		if check {
+			newErrorResponse(c, http.StatusUnauthorized, ErrInvalidAuthHeader.Error())
+			return nil
+		}
+
+		login, err := m.authService.ParseToken(token)
 		if err != nil {
 			newErrorResponse(c, http.StatusUnauthorized, ErrCannotParseToken.Error())
 			return err
 		}
 
-		c.Set("userId", id)
+		c.Set("login", login)
 
 		return next(c)
 	}

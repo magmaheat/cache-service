@@ -14,14 +14,16 @@ import (
 
 type TokenClaims struct {
 	jwt.StandardClaims
-	UserId int
+	Login string
 }
 
 type Auth interface {
 	CheckAdminToken(token string) bool
 	CreateUser(ctx context.Context, login, password string) (string, error)
 	GenerateToken(ctx context.Context, login, password string) (string, error)
-	ParseToken(accessToken string) (int, error)
+	ParseToken(accessToken string) (string, error)
+	AddTokenInBlackList(ctx context.Context, token string) error
+	CheckTokenInBlackList(ctx context.Context, token string) (bool, error)
 }
 
 type AuthService struct {
@@ -72,7 +74,7 @@ func (a *AuthService) CreateUser(ctx context.Context, login, password string) (s
 }
 
 func (a *AuthService) GenerateToken(ctx context.Context, login, password string) (string, error) {
-	id, hash, err := a.authRepo.GetUserIdAndPassword(ctx, login)
+	hash, err := a.authRepo.GetUserPassword(ctx, login)
 	if err != nil {
 		if errors.Is(err, repoerrs.ErrNotFound) {
 			return "", ErrUserNotFound
@@ -89,7 +91,7 @@ func (a *AuthService) GenerateToken(ctx context.Context, login, password string)
 			ExpiresAt: time.Now().Add(a.tokenTTL).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
-		UserId: id,
+		Login: login,
 	})
 
 	tokenString, err := token.SignedString([]byte(a.signKey))
@@ -101,23 +103,32 @@ func (a *AuthService) GenerateToken(ctx context.Context, login, password string)
 	return tokenString, nil
 }
 
-func (s *AuthService) ParseToken(accessToken string) (int, error) {
+func (a *AuthService) ParseToken(accessToken string) (string, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(s.signKey), nil
+		return []byte(a.signKey), nil
 	})
 
 	if err != nil {
-		return 0, fmt.Errorf("cannot parse token")
+		return "", fmt.Errorf("cannot parse token")
 	}
 
 	claims, ok := token.Claims.(*TokenClaims)
 	if !ok {
-		return 0, fmt.Errorf("cannot parse token")
+		return "", fmt.Errorf("cannot parse token")
 	}
 
-	return claims.UserId, nil
+	return claims.Login, nil
+}
+
+func (a *AuthService) AddTokenInBlackList(ctx context.Context, token string) error {
+	return a.authRepo.AddTokenInBlackList(ctx, token)
+}
+
+func (a *AuthService) CheckTokenInBlackList(ctx context.Context, token string) (bool, error) {
+	id, err := a.authRepo.CheckTokenInBlackList(ctx, token)
+	return id > 0, err
 }

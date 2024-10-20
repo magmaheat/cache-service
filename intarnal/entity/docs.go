@@ -3,13 +3,23 @@ package entity
 import "time"
 
 type Meta struct {
-	Id      string    `json:"token"`
+	Id      string    `json:"id"`
 	Name    string    `json:"name"`
 	File    bool      `json:"file"`
 	Public  bool      `json:"public"`
 	Mime    string    `json:"mime"`
 	Grant   []string  `json:"grant"`
 	Created time.Time `json:"created"`
+}
+
+func NewMeta(name string, file, public bool, mime string, grant string) *Meta {
+	return &Meta{
+		Name:   name,
+		File:   file,
+		Public: public,
+		Mime:   mime,
+		Grant:  []string{grant},
+	}
 }
 
 type Document struct {

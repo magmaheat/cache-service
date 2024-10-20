@@ -14,21 +14,20 @@ type Auth interface {
 }
 
 type Cache interface {
-}
-
-type Files interface {
+	SaveJson(ctx context.Context, key, field, data string) error
+	SaveFile(ctx context.Context, key, field string, file []byte) error
+	CheckId(ctx context.Context, id string) (bool, error)
+	GetDocument(ctx context.Context, id string) (map[string]string, error)
 }
 
 type Repositories struct {
 	Auth
-	Files
 	Cache
 }
 
 func New(pg *postgres.Postgres, rd *redis.Redis) *Repositories {
 	return &Repositories{
 		Auth:  pgdb.NewAuthRepo(pg),
-		Files: pgdb.NewFilesRepo(pg),
 		Cache: rddb.NewCacheRepo(rd),
 	}
 }

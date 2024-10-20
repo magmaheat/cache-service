@@ -32,7 +32,7 @@ func (a *authRoutes) register(c echo.Context) error {
 	var input registerInput
 
 	if err := c.Bind(&input); err != nil || input.Token == "" {
-		newErrorResponse(c, http.StatusBadRequest, "invalid tut body request")
+		newErrorResponse(c, http.StatusBadRequest, "invalid body request")
 		return err
 	}
 
@@ -45,7 +45,7 @@ func (a *authRoutes) register(c echo.Context) error {
 
 	login, err := a.authRoutes.CreateUser(c.Request().Context(), input.Login, input.Password)
 	if err != nil {
-		if errors.Is(err, service.ErrAlreadyExists) {
+		if errors.Is(err, service.ErrUserAlreadyExists) {
 			newErrorResponse(c, http.StatusBadRequest, err.Error())
 			return err
 		}
@@ -80,7 +80,7 @@ func (a *authRoutes) auth(c echo.Context) error {
 
 	token, err := a.authRoutes.GenerateToken(c.Request().Context(), input.Username, input.Password)
 	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
+		if errors.Is(err, service.ErrUserNotFound) {
 			newErrorResponse(c, http.StatusNotFound, err.Error())
 			return err
 		}

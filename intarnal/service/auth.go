@@ -63,7 +63,7 @@ func (a *AuthService) CreateUser(ctx context.Context, login, password string) (s
 	userLogin, err := a.authRepo.CreateUser(ctx, login, hash)
 	if err != nil {
 		if errors.Is(err, repoerrs.ErrAlreadyExists) {
-			return "", ErrAlreadyExists
+			return "", ErrUserAlreadyExists
 		}
 		return "", err
 	}
@@ -75,7 +75,7 @@ func (a *AuthService) GenerateToken(ctx context.Context, login, password string)
 	id, hash, err := a.authRepo.GetUserIdAndPassword(ctx, login)
 	if err != nil {
 		if errors.Is(err, repoerrs.ErrNotFound) {
-			return "", ErrNotFound
+			return "", ErrUserNotFound
 		}
 		return "", err
 	}

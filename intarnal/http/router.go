@@ -34,9 +34,9 @@ func Init(services *service.Services) *echo.Echo {
 	}
 
 	authMiddleware := &AuthMiddleware{services.Auth}
-	h := handler.Group("/api", authMiddleware.UserIdentity)
+	fileGroup := handler.Group("/api", authMiddleware.UserIdentity)
 	{
-		_ = h
+		NewFilesRouter(fileGroup, services)
 	}
 
 	//h.Any("/api/*", func(c echo.Context) error {

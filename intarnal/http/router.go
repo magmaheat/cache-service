@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/magmaheat/cache-service/intarnal/service"
+	"github.com/magmaheat/cache-service/pkg/validator"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -24,6 +25,8 @@ func Init(services *service.Services) *echo.Echo {
 		Output: setLogsFile(),
 	}))
 	handler.Use(middleware.Recover())
+
+	handler.Validator = validator.NewCustomValidator()
 
 	handler.GET("/health", func(c echo.Context) error { return c.NoContent(200) })
 	handler.GET("/swagger/*", echoSwagger.WrapHandler)

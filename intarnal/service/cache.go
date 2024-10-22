@@ -10,13 +10,15 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"mime/multipart"
+	"slices"
+	"sort"
 	"time"
 )
 
 type Cache interface {
 	SaveData(ctx context.Context, meta entity.Meta, jsonField string, file *multipart.FileHeader) error
 	GetDocument(ctx context.Context, id string) (*entity.Document, error)
-	GetDocuments(ctx context.Context, meta entity.Meta, limit int) ([]entity.Meta, error)
+	GetDocuments(ctx context.Context, input entity.SearchDocuments) (entity.MetaSlice, error)
 	DeleteDocument(ctx context.Context, id string) error
 }
 
@@ -107,15 +109,42 @@ func (c *CacheService) GetDocument(ctx context.Context, id string) (*entity.Docu
 	return document, nil
 }
 
-func (c *CacheService) GetDocuments(ctx context.Context, meta entity.Meta, limit int) ([]entity.Meta, error) {
+func (c *CacheService) GetDocuments(ctx context.Context, input entity.SearchDocuments) (entity.MetaSlice, error) {
 	metaList, err := c.cacheRepo.GetDocuments(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	_ = metaList
+	var result entity.MetaSlice
 
-	return nil, nil
+	for _, meta := range metaList {
+		switch {
+		case !slices.Contains(meta.Grant, input.Login):
+			continue
+		case input.File != nil && *input.File != meta.File:
+			continue
+		case input.Public != nil && *input.Public != meta.Public:
+			continue
+		case input.Mime != "" && input.Mime != meta.Mime:
+			continue
+		case input.Name != "" && input.Name != meta.Name:
+			continue
+		default:
+			result = append(result, meta)
+		}
+	}
+
+	if len(result) == 0 {
+		return nil, ErrFileNotFound
+	}
+
+	sort.Sort(result)
+
+	if input.Limit != 0 && input.Limit <= len(result) {
+		return result[:input.Limit], nil
+	}
+
+	return result, nil
 }
 
 func (c *CacheService) DeleteDocument(ctx context.Context, id string) error {

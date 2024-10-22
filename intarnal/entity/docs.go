@@ -12,6 +12,23 @@ type Meta struct {
 	Created time.Time `json:"created"`
 }
 
+type MetaSlice []Meta
+
+func (m MetaSlice) Len() int {
+	return len(m)
+}
+
+func (m MetaSlice) Swap(i, j int) {
+	m[i], m[j] = m[j], m[i]
+}
+
+func (m MetaSlice) Less(i, j int) bool {
+	if m[i].Name == m[j].Name {
+		return m[i].Created.Before(m[j].Created)
+	}
+	return m[i].Name < m[j].Name
+}
+
 func NewMeta(name string, file, public bool, mime string, grant string) *Meta {
 	return &Meta{
 		Name:   name,
@@ -36,4 +53,13 @@ func NewDocument(body []byte, mime, name, jsonBody string) *Document {
 		Name:     name,
 		JsonBody: jsonBody,
 	}
+}
+
+type SearchDocuments struct {
+	Login  string `json:"login"`
+	Limit  int    `json:"limit"`
+	Name   string `json:"name"`
+	File   *bool  `json:"file"`
+	Public *bool  `json:"public"`
+	Mime   string `json:"mime"`
 }

@@ -24,8 +24,8 @@ func newAuthRoutes(g *echo.Group, authService service.Auth) {
 }
 
 type registerInput struct {
-	Login    string `json:"login"`
-	Password string `json:"pswd"`
+	Login    string `json:"login" validate:"required,login"`
+	Password string `json:"pswd" validate:"required,password"`
 	Token    string `json:"token"`
 }
 
@@ -42,7 +42,10 @@ func (a *authRoutes) register(c echo.Context) error {
 		return fmt.Errorf("invalid token")
 	}
 
-	//TODO add validate
+	if err := c.Validate(input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return err
+	}
 
 	login, err := a.authRoutes.CreateUser(c.Request().Context(), input.Login, input.Password)
 	if err != nil {
@@ -66,8 +69,8 @@ func (a *authRoutes) register(c echo.Context) error {
 }
 
 type authInput struct {
-	Username string `json:"login"`
-	Password string `json:"pswd"`
+	Login    string `json:"login" required:"true"`
+	Password string `json:"pswd" required:"true"`
 }
 
 func (a *authRoutes) auth(c echo.Context) error {
@@ -79,7 +82,7 @@ func (a *authRoutes) auth(c echo.Context) error {
 		return err
 	}
 
-	token, err := a.authRoutes.GenerateToken(c.Request().Context(), input.Username, input.Password)
+	token, err := a.authRoutes.GenerateToken(c.Request().Context(), input.Login, input.Password)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {
 			newErrorResponse(c, http.StatusNotFound, err.Error())

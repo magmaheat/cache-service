@@ -2,6 +2,7 @@ package rddb
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/magmaheat/cache-service/intarnal/entity"
 	"github.com/magmaheat/cache-service/pkg/redis"
@@ -57,9 +58,11 @@ func (c *CacheRepo) GetDocument(ctx context.Context, id string) (map[string]stri
 }
 
 func (c *CacheRepo) GetDocuments(ctx context.Context) ([]entity.Meta, error) {
+	const fn = "repo - cache - GetDocuments"
+
 	keys, err := c.Client.Keys(ctx, "document:*").Result()
 	if err != nil {
-		log.Errorf("repo - cache - GetDocuments - Client.Keys: %v", err)
+		log.Errorf("%s - Client.Keys: %v", fn, err)
 		return nil, err
 	}
 
@@ -68,9 +71,15 @@ func (c *CacheRepo) GetDocuments(ctx context.Context) ([]entity.Meta, error) {
 	for _, key := range keys {
 		var meta entity.Meta
 
-		err = c.Client.HGet(ctx, key, "meta").Scan(&meta)
+		result, err := c.Client.HGet(ctx, key, "meta").Result()
 		if err != nil {
-			log.Error("repo - cache - GetDocuments - HGet: %v", err)
+			log.Errorf("%s - HGet: %v", fn, err)
+			return nil, err
+		}
+
+		err = json.Unmarshal([]byte(result), &meta)
+		if err != nil {
+			log.Errorf("%s - json.Unmurshal: %v", fn, err)
 			return nil, err
 		}
 

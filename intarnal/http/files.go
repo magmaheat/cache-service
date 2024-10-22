@@ -112,18 +112,8 @@ func (f *cacheRouter) getDocument(c echo.Context) error {
 	return nil
 }
 
-type inputGetDocuments struct {
-	Login  string   `json:"login"`
-	Limit  int      `json:"limit"`
-	Name   string   `json:"name"`
-	File   bool     `json:"file"`
-	Public bool     `json:"public"`
-	Mime   string   `json:"mime"`
-	Grant  []string `json:"grant"`
-}
-
 func (f *cacheRouter) getDocuments(c echo.Context) error {
-	var input inputGetDocuments
+	var input entity.SearchDocuments
 
 	if err := c.Bind(&input); err != nil {
 		log.Errorf("http - files - c.Bind: %v", err)
@@ -135,17 +125,26 @@ func (f *cacheRouter) getDocuments(c echo.Context) error {
 		input.Login = c.Get("login").(string)
 	}
 
-	meta := entity.NewMeta(input.Name, input.File, input.Public, input.Mime, input.Login)
-	metaList, err := f.cacheRouter.GetDocuments(c.Request().Context(), *meta, input.Limit)
+	metaList, err := f.cacheRouter.GetDocuments(c.Request().Context(), input)
 	if err != nil {
+		if errors.Is(err, service.ErrFileNotFound) {
+			newErrorResponse(c, http.StatusNotFound, "files not found")
+			return err
+		}
+
 		newErrorResponse(c, http.StatusInternalServerError, "internal server error")
 		return err
 	}
 
-	//TODO developing method
-	_ = metaList
+	type response struct {
+		Docs entity.MetaSlice `json:"docs"`
+	}
 
-	return nil
+	return c.JSON(http.StatusOK, Response{
+		Data: response{
+			Docs: metaList,
+		},
+	})
 }
 
 func (f *cacheRouter) deleteDocument(c echo.Context) error {

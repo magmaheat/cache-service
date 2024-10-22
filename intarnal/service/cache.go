@@ -35,8 +35,6 @@ func (c *CacheService) SaveData(ctx context.Context, meta entity.Meta, jsonField
 
 	meta.Id = uuid.New().String()
 
-	log.Infof("save document id: %s", meta.Id)
-
 	exists, err := c.cacheRepo.CheckId(ctx, meta.Id)
 	if err != nil {
 		return err
@@ -60,6 +58,8 @@ func (c *CacheService) SaveData(ctx context.Context, meta entity.Meta, jsonField
 		return err
 	}
 
+	log.Debugf("save meta document id: %s", meta.Id)
+
 	if file != nil {
 		src, err := file.Open()
 		if err != nil {
@@ -77,8 +77,16 @@ func (c *CacheService) SaveData(ctx context.Context, meta entity.Meta, jsonField
 		}
 	}
 
+	log.Debugf("save file document id: %s", meta.Id)
+
 	if jsonField != "" {
 		err = c.cacheRepo.SaveJson(ctx, key, "json", jsonField)
+		if err != nil {
+			return err
+		}
+
+		log.Debugf("save json document id: %s", meta.Id)
+
 	}
 
 	return nil
@@ -93,6 +101,8 @@ func (c *CacheService) GetDocument(ctx context.Context, id string) (*entity.Docu
 	if len(allFields) == 0 {
 		return &entity.Document{}, ErrFileNotFound
 	}
+
+	log.Debugf("counts field in result: %d", len(allFields))
 
 	var meta entity.Meta
 	strMeta := allFields["meta"]
@@ -115,6 +125,8 @@ func (c *CacheService) GetDocuments(ctx context.Context, input entity.SearchDocu
 		return nil, err
 	}
 
+	log.Debugf("count meta files for filter search: %d", len(metaList))
+
 	var result entity.MetaSlice
 
 	for _, meta := range metaList {
@@ -133,6 +145,8 @@ func (c *CacheService) GetDocuments(ctx context.Context, input entity.SearchDocu
 			result = append(result, meta)
 		}
 	}
+
+	log.Debugf("found example: %d", len(result))
 
 	if len(result) == 0 {
 		return nil, ErrFileNotFound

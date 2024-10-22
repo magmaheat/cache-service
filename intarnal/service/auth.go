@@ -70,6 +70,8 @@ func (a *AuthService) CreateUser(ctx context.Context, login, password string) (s
 		return "", err
 	}
 
+	log.Debugf("user: %s registered", login)
+
 	return userLogin, nil
 }
 
@@ -129,6 +131,8 @@ func (a *AuthService) AddTokenInBlackList(ctx context.Context, token string) err
 }
 
 func (a *AuthService) CheckTokenInBlackList(ctx context.Context, token string) (bool, error) {
-	id, err := a.authRepo.CheckTokenInBlackList(ctx, token)
-	return id > 0, err
+	count, err := a.authRepo.CheckTokenInBlackList(ctx, token)
+
+	log.Debugf("found %d tokens in black list", count)
+	return count > 0, err
 }

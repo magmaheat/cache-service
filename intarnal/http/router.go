@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/magmaheat/cache-service/intarnal/service"
 	"github.com/magmaheat/cache-service/pkg/validator"
+	"net/http"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -42,10 +43,11 @@ func Init(services *service.Services) *echo.Echo {
 		NewFilesRouter(fileGroup, services)
 	}
 
-	//h.Any("/api/*", func(c echo.Context) error {
-	//	newErrorResponse(c, http.StatusMethodNotAllowed, "Method not allowed")
-	//	return nil
-	//})
+	handler.Any("/api/*", func(c echo.Context) error {
+		log.Debugf("method %s not implementation for URL %s", c.Request().Method, c.Request().URL)
+		newErrorResponse(c, http.StatusNotImplemented, "Method not allowed")
+		return nil
+	})
 
 	return handler
 }

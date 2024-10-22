@@ -37,16 +37,23 @@ func (f *cacheRouter) createDocument(c echo.Context) error {
 		return fmt.Errorf("meta json invalid")
 	}
 
-	jsonField := c.FormValue("json")
+	jsonStr := c.FormValue("json")
+	var jsonField map[string]interface{}
+	if jsonStr != "" {
+		if err := json.Unmarshal([]byte(jsonStr), &jsonField); err != nil {
+			newErrorResponse(c, http.StatusBadRequest, "invalid json field")
+			return err
+
+		}
+	}
 
 	file, err := c.FormFile("file")
-	if err != nil && jsonField == "" {
+	if err != nil && jsonStr == "" {
 		newErrorResponse(c, http.StatusBadRequest, "missing file in body request")
 		return err
 	}
 
-	//TODO file: true?
-	err = f.cacheRouter.SaveData(c.Request().Context(), meta, jsonField, file)
+	err = f.cacheRouter.SaveData(c.Request().Context(), meta, jsonStr, file)
 	if err != nil {
 		if errors.Is(err, service.ErrFileAlreadyExists) {
 			newErrorResponse(c, http.StatusBadRequest, err.Error())
@@ -58,8 +65,8 @@ func (f *cacheRouter) createDocument(c echo.Context) error {
 	}
 
 	type response struct {
-		Json string `json:"json"` //TODO transform?
-		File string `json:"file"`
+		Json map[string]interface{} `json:"json"`
+		File string                 `json:"file"`
 	}
 
 	return c.JSON(http.StatusOK, Response{

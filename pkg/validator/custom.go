@@ -26,6 +26,7 @@ var (
 	digitRegexp     = regexp.MustCompile(fmt.Sprintf(`[0-9]{%d,}`, passwordMinDigit))
 	symbolRegexp    = regexp.MustCompile(fmt.Sprintf(`[!@#$%%^&*]{%d,}`, passwordMinSymbol))
 	loginRegexp     = regexp.MustCompile(fmt.Sprintf(`^[a-zA-Z0-9]{%d,}$`, loginMinLength))
+	digitInLogin    = regexp.MustCompile(`[0-9]`)
 )
 
 type CustomValidator struct {
@@ -73,8 +74,6 @@ func (cv *CustomValidator) newValidationError(field string, value interface{}, t
 	switch tag {
 	case "required":
 		return fmt.Errorf("field %s is required", field)
-	case "email":
-		return fmt.Errorf("field %s must be a valid email address", field)
 	case "password":
 		return cv.passwdErr
 	case "login":
@@ -125,7 +124,12 @@ func (cv *CustomValidator) loginValidate(fl validator.FieldLevel) bool {
 	fieldValue := fl.Field().String()
 
 	if ok := loginRegexp.MatchString(fieldValue); !ok {
-		cv.loginErr = fmt.Errorf("field %s must be at least %d characters long and contain only letters and digits", fl.FieldName(), loginMinLength)
+		cv.loginErr = fmt.Errorf("field %s must be at least %d characters long and contain only latin letters and digits", fl.FieldName(), loginMinLength)
+		return false
+	}
+
+	if ok := digitInLogin.MatchString(fieldValue); !ok {
+		cv.loginErr = fmt.Errorf("field %s must contain at least one digit", fl.FieldName())
 		return false
 	}
 

@@ -57,8 +57,8 @@ func (f *cacheRouter) createDocument(c echo.Context) error {
 	}
 
 	file, err := c.FormFile("file")
-	if err != nil && jsonStr == "" {
-		newErrorResponse(c, http.StatusBadRequest, "missing file in body request")
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid file field")
 		return err
 	}
 

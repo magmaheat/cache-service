@@ -17,7 +17,7 @@ type ErrorResponse struct {
 
 func newErrorResponse(c echo.Context, status int, message string) {
 	c.JSON(status, Response{
-		Errors: &ErrorResponse{
+		Errors: ErrorResponse{
 			Code: status,
 			Text: message,
 		},

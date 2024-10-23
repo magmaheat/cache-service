@@ -1,0 +1,238 @@
+basePath: /api/
+definitions:
+  http.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      text:
+        type: string
+    type: object
+  http.Response:
+    properties:
+      data: {}
+      error:
+        $ref: '#/definitions/http.ErrorResponse'
+      response: {}
+    type: object
+  http.authInput:
+    properties:
+      login:
+        type: string
+      pswd:
+        type: string
+    type: object
+  http.registerInput:
+    properties:
+      login:
+        type: string
+      pswd:
+        type: string
+      token:
+        type: string
+    required:
+    - login
+    - pswd
+    type: object
+host: localhost:8090
+info:
+  contact:
+    email: epishcom@gmail.com
+    name: George Epishev
+  description: This service is for caching documents
+  title: Cache Service
+  version: 0.0.1
+paths:
+  /auth:
+    post:
+      consumes:
+      - application/json
+      description: Auth
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/http.authInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Auth
+      tags:
+      - auth
+  /auth/{token}:
+    delete:
+      description: Delete token
+      parameters:
+      - description: Token to delete
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Delete token
+      tags:
+      - auth
+  /docs:
+    get:
+      consumes:
+      - application/json
+      description: Get documents. The HEAD method is also supported and returns only
+        the headers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get documents
+      tags:
+      - files
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create document
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Create document
+      tags:
+      - files
+  /docs/{id}:
+    delete:
+      description: Delete document
+      parameters:
+      - description: ID to delete document
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Delete document
+      tags:
+      - files
+    get:
+      description: Get document. The HEAD method is also supported and returns only
+        the headers.
+      parameters:
+      - description: ID to get document
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get document
+      tags:
+      - files
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/http.registerInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Register
+      tags:
+      - auth
+securityDefinitions:
+  JWT:
+    description: JWT token
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

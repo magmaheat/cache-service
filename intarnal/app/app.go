@@ -16,6 +16,20 @@ import (
 	"syscall"
 )
 
+// @title           Cache Service
+// @version         0.0.1
+// @description     This service is for caching documents
+
+// @contact.name   George Epishev
+// @contact.email  epishcom@gmail.com
+
+// @host      localhost:8090
+// @BasePath  /api/
+
+// @securityDefinitions.apikey  JWT
+// @in                          header
+// @name                        Authorization
+// @description					JWT token
 func Run() {
 	cfg := config.New()
 

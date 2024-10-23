@@ -15,6 +15,8 @@ import (
 	"time"
 )
 
+const defaultCountFiles = 10
+
 type Cache interface {
 	SaveData(ctx context.Context, meta entity.Meta, jsonField string, file *multipart.FileHeader) error
 	GetDocument(ctx context.Context, id string) (*entity.Document, error)
@@ -158,7 +160,7 @@ func (c *CacheService) GetDocuments(ctx context.Context, input entity.SearchDocu
 		return result[:input.Limit], nil
 	}
 
-	return result, nil
+	return result[:defaultCountFiles], nil
 }
 
 func (c *CacheService) DeleteDocument(ctx context.Context, id string) error {

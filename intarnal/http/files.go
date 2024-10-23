@@ -28,6 +28,15 @@ func NewFilesRouter(handler *echo.Group, services *service.Services) {
 	handler.DELETE("/docs/:id", f.deleteDocument)
 }
 
+// @Summary Create document
+// @Description Create document
+// @Tags files
+// @Accept multipart/form-data
+// @Produce json
+// @Success 200 {object} http.Response
+// @Failure 400 {object} http.ErrorResponse
+// @Failure 500 {object} http.ErrorResponse
+// @Router /docs [post]
 func (f *cacheRouter) createDocument(c echo.Context) error {
 	var meta entity.Meta
 
@@ -77,6 +86,15 @@ func (f *cacheRouter) createDocument(c echo.Context) error {
 	})
 }
 
+// @Summary Get document
+// @Description Get document. The HEAD method is also supported and returns only the headers.
+// @Tags files
+// @Produce json
+// @Param id path string true "ID to get document"
+// @Success 200 {object} http.Response
+// @Failure 400 {object} http.ErrorResponse
+// @Failure 500 {object} http.ErrorResponse
+// @Router /docs/{id} [get]
 func (f *cacheRouter) getDocument(c echo.Context) error {
 	id := c.Param("id")
 
@@ -119,6 +137,15 @@ func (f *cacheRouter) getDocument(c echo.Context) error {
 	return nil
 }
 
+// @Summary Get documents
+// @Description Get documents. The HEAD method is also supported and returns only the headers.
+// @Tags files
+// @Accept json
+// @Produce json
+// @Success 200 {object} http.Response
+// @Failure 400 {object} http.ErrorResponse
+// @Failure 500 {object} http.ErrorResponse
+// @Router /docs [get]
 func (f *cacheRouter) getDocuments(c echo.Context) error {
 	var input entity.SearchDocuments
 
@@ -154,6 +181,15 @@ func (f *cacheRouter) getDocuments(c echo.Context) error {
 	})
 }
 
+// @Summary Delete document
+// @Description Delete document
+// @Tags files
+// @Produce json
+// @Param id path string true "ID to delete document"
+// @Success 200 {object} http.Response
+// @Failure 400 {object} http.ErrorResponse
+// @Failure 500 {object} http.ErrorResponse
+// @Router /docs/{id} [delete]
 func (f *cacheRouter) deleteDocument(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {

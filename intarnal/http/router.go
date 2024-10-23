@@ -8,14 +8,15 @@ import (
 	"net/http"
 	"os"
 
+	_ "github.com/magmaheat/cache-service/docs"
 	log "github.com/sirupsen/logrus"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 type Response struct {
-	Errors   *ErrorResponse `json:"error,omitempty"`
-	Response interface{}    `json:"response,omitempty"`
-	Data     interface{}    `json:"data,omitempty"`
+	Errors   ErrorResponse `json:"error,omitempty"`
+	Response interface{}   `json:"response,omitempty"`
+	Data     interface{}   `json:"data,omitempty"`
 }
 
 func Init(services *service.Services) *echo.Echo {

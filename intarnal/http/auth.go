@@ -26,9 +26,19 @@ func newAuthRoutes(g *echo.Group, authService service.Auth) {
 type registerInput struct {
 	Login    string `json:"login" validate:"required,login"`
 	Password string `json:"pswd" validate:"required,password"`
-	Token    string `json:"token"`
+	Token    string `json:"token" required:"true"`
 }
 
+// @Summary Register
+// @Description Register
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body registerInput true "input"
+// @Success 200 {object} http.Response
+// @Failure 400 {object} http.ErrorResponse
+// @Failure 500 {object} http.ErrorResponse
+// @Router /register [post]
 func (a *authRoutes) register(c echo.Context) error {
 	var input registerInput
 
@@ -73,6 +83,16 @@ type authInput struct {
 	Password string `json:"pswd" required:"true"`
 }
 
+// @Summary Auth
+// @Description Auth
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body authInput true "input"
+// @Success 200 {object} http.Response
+// @Failure 400 {object} http.ErrorResponse
+// @Failure 500 {object} http.ErrorResponse
+// @Router /auth [post]
 func (a *authRoutes) auth(c echo.Context) error {
 	var input authInput
 
@@ -109,6 +129,15 @@ func (a *authRoutes) auth(c echo.Context) error {
 	})
 }
 
+// @Summary Delete token
+// @Description Delete token
+// @Tags auth
+// @Produce json
+// @Param token path string true "Token to delete"
+// @Success 200 {object} http.Response
+// @Failure 400 {object} http.ErrorResponse
+// @Failure 500 {object} http.ErrorResponse
+// @Router /auth/{token} [delete]
 func (a *authRoutes) deleteToken(c echo.Context) error {
 	token := c.Param("token")
 

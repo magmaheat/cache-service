@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/magmaheat/cache-service/intarnal/repo"
+	"github.com/magmaheat/cache-service/internal/repo"
 	"github.com/magmaheat/cache-service/pkg/hasher"
 	"time"
 )

@@ -2,9 +2,9 @@ package repo
 
 import (
 	"context"
-	"github.com/magmaheat/cache-service/intarnal/entity"
-	"github.com/magmaheat/cache-service/intarnal/repo/pgdb"
-	"github.com/magmaheat/cache-service/intarnal/repo/rddb"
+	"github.com/magmaheat/cache-service/internal/entity"
+	"github.com/magmaheat/cache-service/internal/repo/pgdb"
+	"github.com/magmaheat/cache-service/internal/repo/rddb"
 	"github.com/magmaheat/cache-service/pkg/postgres"
 	"github.com/magmaheat/cache-service/pkg/redis"
 )

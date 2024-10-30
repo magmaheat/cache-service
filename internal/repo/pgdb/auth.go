@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
-	"github.com/magmaheat/cache-service/intarnal/repo/repoerrs"
+	"github.com/magmaheat/cache-service/internal/repo/repoerrs"
 	"github.com/magmaheat/cache-service/pkg/postgres"
 	log "github.com/sirupsen/logrus"
 )

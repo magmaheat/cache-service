@@ -2,7 +2,7 @@ package http
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/magmaheat/cache-service/intarnal/service"
+	"github.com/magmaheat/cache-service/internal/service"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strings"

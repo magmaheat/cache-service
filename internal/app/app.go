@@ -3,9 +3,9 @@ package app
 import (
 	"fmt"
 	"github.com/magmaheat/cache-service/config"
-	"github.com/magmaheat/cache-service/intarnal/http"
-	"github.com/magmaheat/cache-service/intarnal/repo"
-	"github.com/magmaheat/cache-service/intarnal/service"
+	"github.com/magmaheat/cache-service/internal/http"
+	"github.com/magmaheat/cache-service/internal/repo"
+	"github.com/magmaheat/cache-service/internal/service"
 	"github.com/magmaheat/cache-service/pkg/hasher"
 	"github.com/magmaheat/cache-service/pkg/httpserver"
 	"github.com/magmaheat/cache-service/pkg/postgres"

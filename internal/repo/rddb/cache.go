@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/magmaheat/cache-service/intarnal/entity"
+	"github.com/magmaheat/cache-service/internal/entity"
 	"github.com/magmaheat/cache-service/pkg/redis"
 	log "github.com/sirupsen/logrus"
 )

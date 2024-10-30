@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
-	"github.com/magmaheat/cache-service/intarnal/service"
+	"github.com/magmaheat/cache-service/internal/service"
 	"net/http"
 )
 

@@ -3,7 +3,7 @@ package http
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/magmaheat/cache-service/intarnal/service"
+	"github.com/magmaheat/cache-service/internal/service"
 	"github.com/magmaheat/cache-service/pkg/validator"
 	"net/http"
 	"os"

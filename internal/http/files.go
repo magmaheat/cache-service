@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/magmaheat/cache-service/intarnal/entity"
-	"github.com/magmaheat/cache-service/intarnal/service"
+	"github.com/magmaheat/cache-service/internal/entity"
+	"github.com/magmaheat/cache-service/internal/service"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
